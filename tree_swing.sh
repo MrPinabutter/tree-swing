@@ -6,7 +6,7 @@ CONFIG_FILE="branches.txt"
 function choose_option() {
     local options=("$@")
     local selected=0
-
+    
     while true; do
         clear
         echo "Select an option:"
@@ -52,12 +52,14 @@ if [[ ! -f $CONFIG_FILE ]]; then
 fi
 
 while read -r slug branch; do
-    [[ -z "$slug" || -z "$branch" ]] && continue
-    SLUGS[$slug]=$branch
+  [[ -z "$slug" || -z "$branch" ]] && continue
+  SLUGS[$slug]=$branch
 done < "$CONFIG_FILE"
 
 # Menu options
-OPTIONS=("dev" "stag" "other")
+OPTIONS=("${!SLUGS[@]}" "other")
+
+echo  "Options: ${OPTIONS[*]}"
 
 selection=$(choose_option "${OPTIONS[@]}")
 
