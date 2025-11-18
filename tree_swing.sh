@@ -2,6 +2,20 @@
 
 CONFIG_FILE="branches.txt"
 
+# --- Color definitions ---
+COLOR_RESET="\033[0m"
+COLOR_BOLD="\033[1m"
+COLOR_DIM="\033[2m"
+COLOR_CYAN="\033[36m"
+COLOR_GREEN="\033[32m"
+COLOR_YELLOW="\033[33m"
+COLOR_BLUE="\033[34m"
+COLOR_MAGENTA="\033[35m"
+COLOR_RED="\033[31m"
+COLOR_BG_CYAN="\033[46m"
+COLOR_BG_GREEN="\033[42m"
+COLOR_BLACK="\033[30m"
+
 # --- function to show arrow-key menu ---
 function choose_option() {
     local options=("$@")
@@ -15,13 +29,13 @@ function choose_option() {
         tput cup 0 0
         tput ed
         
-        echo "Select an option (use arrow keys, press Enter to confirm):"
+        echo -e "${COLOR_BOLD}${COLOR_CYAN}Select an option${COLOR_RESET} ${COLOR_DIM}(use arrow keys, press Enter to confirm)${COLOR_RESET}"
         echo ""
         for i in "${!options[@]}"; do
             if [[ $i == $selected ]]; then
-                echo "> ${options[$i]}"
+                echo -e "${COLOR_BG_GREEN}${COLOR_BLACK}${COLOR_BOLD} ▶ ${options[$i]} ${COLOR_RESET}"
             else
-                echo "  ${options[$i]}"
+                echo -e "${COLOR_DIM}   ${options[$i]}${COLOR_RESET}"
             fi
         done
 
@@ -56,9 +70,10 @@ function choose_option() {
 declare -A SLUGS
 
 if [[ ! -f $CONFIG_FILE ]]; then
-    echo "branches.txt not found! Create a file like:"
-    echo "dev develop"
-    echo "stag staging"
+    echo -e "${COLOR_RED}${COLOR_BOLD}Error:${COLOR_RESET} branches.txt not found!"
+    echo -e "${COLOR_YELLOW}Create a file like:${COLOR_RESET}"
+    echo -e "${COLOR_DIM}dev develop${COLOR_RESET}"
+    echo -e "${COLOR_DIM}stag staging${COLOR_RESET}"
     exit 1
 fi
 
@@ -74,34 +89,39 @@ choose_option "${OPTIONS[@]}"
 selection="$CHOSEN_OPTION"
 
 if [[ "$selection" == "other" ]]; then
-    read -p "Enter branch slug: " slug
-    read -p "Enter branch name: " branch
+    echo -e "${COLOR_CYAN}Enter branch slug:${COLOR_RESET} "
+    read slug
+    echo -e "${COLOR_CYAN}Enter branch name:${COLOR_RESET} "
+    read branch
 else
     slug="$selection"
     branch="${SLUGS[$selection]}"
 fi
 
 if [[ -z "$branch" ]]; then
-    echo "Branch name not found for '$slug'. Check branches.txt"
+    echo -e "${COLOR_RED}${COLOR_BOLD}Error:${COLOR_RESET} Branch name not found for '$slug'. Check branches.txt"
     exit 1
 fi
 
-echo "Selected slug: $slug"
-echo "Selected branch: $branch"
+echo ""
+echo -e "${COLOR_GREEN}✓${COLOR_RESET} Selected slug: ${COLOR_BOLD}${COLOR_MAGENTA}$slug${COLOR_RESET}"
+echo -e "${COLOR_GREEN}✓${COLOR_RESET} Selected branch: ${COLOR_BOLD}${COLOR_BLUE}$branch${COLOR_RESET}"
+echo ""
 
 # --- Git operations ---
 current_branch=$(git rev-parse --abbrev-ref HEAD)
 
-echo "Running: git fetch origin $branch:$branch --force"
+echo -e "${COLOR_YELLOW}▶${COLOR_RESET} Running: ${COLOR_DIM}git fetch origin $branch:$branch --force${COLOR_RESET}"
 git fetch origin "$branch:$branch" --force
 
-echo "Running: git branch -D for-$slug/$current_branch"
+echo -e "${COLOR_YELLOW}▶${COLOR_RESET} Running: ${COLOR_DIM}git branch -D for-$slug/$current_branch${COLOR_RESET}"
 git branch -D "for-$slug/$current_branch" 2>/dev/null
 
-echo "Running: git switch -c for-$slug/$current_branch"
+echo -e "${COLOR_YELLOW}▶${COLOR_RESET} Running: ${COLOR_DIM}git switch -c for-$slug/$current_branch${COLOR_RESET}"
 git switch -c "for-$slug/$current_branch"
 
-echo "Running: git merge origin/$branch"
+echo -e "${COLOR_YELLOW}▶${COLOR_RESET} Running: ${COLOR_DIM}git merge origin/$branch${COLOR_RESET}"
 git merge "origin/$branch"
 
-echo "Done!"
+echo ""
+echo -e "${COLOR_GREEN}${COLOR_BOLD}✓ Done!${COLOR_RESET}"
