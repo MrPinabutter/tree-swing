@@ -7,9 +7,16 @@ function choose_option() {
     local options=("$@")
     local selected=0
     
+    # Hide cursor
+    tput civis
+    
     while true; do
-        clear
-        echo "Select an option:"
+        # Move cursor to top and clear from there
+        tput cup 0 0
+        tput ed
+        
+        echo "Select an option (use arrow keys, press Enter to confirm):"
+        echo ""
         for i in "${!options[@]}"; do
             if [[ $i == $selected ]]; then
                 echo "> ${options[$i]}"
@@ -34,7 +41,11 @@ function choose_option() {
                 if ((selected >= ${#options[@]})); then selected=0; fi
                 ;;
             "") # enter
-                echo "${options[$selected]}"
+                # Clear screen and show cursor
+                tput clear
+                tput cnorm
+                # Return the selection via a variable instead of echo
+                CHOSEN_OPTION="${options[$selected]}"
                 return
                 ;;
         esac
@@ -59,9 +70,8 @@ done < "$CONFIG_FILE"
 # Menu options
 OPTIONS=("${!SLUGS[@]}" "other")
 
-echo  "Options: ${OPTIONS[*]}"
-
-selection=$(choose_option "${OPTIONS[@]}")
+choose_option "${OPTIONS[@]}"
+selection="$CHOSEN_OPTION"
 
 if [[ "$selection" == "other" ]]; then
     read -p "Enter branch slug: " slug
