@@ -1,4 +1,4 @@
-# Tree Swing 🌳🎯
+# tree-swing 🌳🎯
 
 > A colorful, interactive bash script for merging branches with a beautiful arrow-key menu interface
 
@@ -42,19 +42,16 @@ chmod +x ~/.local/bin/tree-swing
 Add `~/.local/bin` to your PATH if it's not already there.
 
 **For Bash** (add to `~/.bashrc` or `~/.bash_profile`):
-
 ```bash
 export PATH="$HOME/.local/bin:$PATH"
 ```
 
 **For Zsh** (add to `~/.zshrc`):
-
 ```bash
 export PATH="$HOME/.local/bin:$PATH"
 ```
 
 **For Fish** (add to `~/.config/fish/config.fish`):
-
 ```fish
 set -gx PATH $HOME/.local/bin $PATH
 ```
@@ -76,7 +73,30 @@ source ~/.config/fish/config.fish
 
 ## Configuration
 
-Create a `branches.txt` file in your git repository root with your branch mappings:
+Create a `branches.txt` file with your branch mappings. The script checks for the config in this order:
+
+1. **Current directory** - `./branches.txt` (repository-specific config)
+2. **Home config directory** - `~/.config/tree-swing/branches.txt` (global config)
+3. **System config** - `/etc/tree-swing/branches.txt` (system-wide config)
+
+### Setting up global config
+
+```bash
+# Create config directory
+mkdir -p ~/.config/tree-swing
+
+# Create your branches file
+nano ~/.config/tree-swing/branches.txt
+```
+
+### Setting up repository-specific config
+
+```bash
+# In your git repository root
+nano branches.txt
+```
+
+### Config file format
 
 ```
 dev develop
@@ -88,6 +108,8 @@ main main
 Format: `slug branch_name`
 
 Each line defines a slug (shorthand) and the actual branch name.
+
+**Tip:** Use repository-specific configs when different projects have different branch naming conventions, and use the global config for personal defaults.
 
 ## Usage
 
@@ -110,7 +132,6 @@ tree-swing
 ### Example workflow:
 
 If you're on branch `feature/new-ui` and select `dev` from the menu:
-
 - Fetches `origin/develop`
 - Creates branch `for-dev/feature/new-ui`
 - Merges `origin/develop` into it
@@ -118,25 +139,21 @@ If you're on branch `feature/new-ui` and select `dev` from the menu:
 ### Custom branch option:
 
 Select "other" from the menu to manually enter:
-
 - Branch slug
 - Branch name
 
 ## Troubleshooting
 
 ### Command not found
-
 - Make sure `~/.local/bin` is in your PATH
 - Verify the script is executable: `ls -l ~/.local/bin/tree-swing`
 - Try running with full path: `~/.local/bin/tree-swing`
 
 ### branches.txt not found
-
 - Create `branches.txt` in your repository root
 - Or modify `CONFIG_FILE` in the script to use a different location
 
 ### Menu not displaying correctly
-
 - Make sure your terminal supports ANSI colors
 - Try a different terminal emulator if issues persist
 
@@ -145,14 +162,12 @@ Select "other" from the menu to manually enter:
 You can also install to:
 
 **System-wide** (requires sudo):
-
 ```bash
 sudo cp tree-swing /usr/local/bin/
 sudo chmod +x /usr/local/bin/tree-swing
 ```
 
 **Current directory only**:
-
 ```bash
 chmod +x tree-swing
 ./tree-swing

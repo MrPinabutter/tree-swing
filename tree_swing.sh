@@ -1,6 +1,15 @@
 #!/usr/bin/env bash
 
-CONFIG_FILE="branches.txt"
+# Check for config in order: current dir, home config, system config
+if [[ -f "branches.txt" ]]; then
+    CONFIG_FILE="branches.txt"
+elif [[ -f "$HOME/.config/tree-swing/branches.txt" ]]; then
+    CONFIG_FILE="$HOME/.config/tree-swing/branches.txt"
+elif [[ -f "/etc/tree-swing/branches.txt" ]]; then
+    CONFIG_FILE="/etc/tree-swing/branches.txt"
+else
+    CONFIG_FILE=""
+fi
 
 # --- Color definitions ---
 COLOR_RESET="\033[0m"
@@ -69,9 +78,14 @@ function choose_option() {
 # --- Load defaults from txt ---
 declare -A SLUGS
 
-if [[ ! -f $CONFIG_FILE ]]; then
+if [[ -z "$CONFIG_FILE" ]]; then
     echo -e "${COLOR_RED}${COLOR_BOLD}Error:${COLOR_RESET} branches.txt not found!"
-    echo -e "${COLOR_YELLOW}Create a file like:${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}Checked locations:${COLOR_RESET}"
+    echo -e "${COLOR_DIM}  1. ./branches.txt (current directory)${COLOR_RESET}"
+    echo -e "${COLOR_DIM}  2. ~/.config/tree-swing/branches.txt (home config)${COLOR_RESET}"
+    echo -e "${COLOR_DIM}  3. /etc/tree-swing/branches.txt (system config)${COLOR_RESET}"
+    echo ""
+    echo -e "${COLOR_YELLOW}Create a config file with format:${COLOR_RESET}"
     echo -e "${COLOR_DIM}dev develop${COLOR_RESET}"
     echo -e "${COLOR_DIM}stag staging${COLOR_RESET}"
     exit 1
@@ -99,7 +113,7 @@ else
 fi
 
 if [[ -z "$branch" ]]; then
-    echo -e "${COLOR_RED}${COLOR_BOLD}Error:${COLOR_RESET} Branch name not found for '$slug'. Check branches.txt"
+    echo -e "${COLOR_RED}${COLOR_BOLD}Error:${COLOR_RESET} Branch name not found for '$slug'. Check $CONFIG_FILE"
     exit 1
 fi
 
